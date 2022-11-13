@@ -1,16 +1,35 @@
 require("dotenv").config();
+const jsonwebtoken = require("jsonwebtoken");
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, Timestamp } = require("mongodb");
 const app = express();
 const port = 5000;
-/* --------------------------------------------------------------------- */
-/*                              middleware                              */
-/* --------------------------------------------------------------------- */
 
 app.use(cors());
 app.use(express.json());
 // routes section start
+/* --------------------------------------------------------------------- */
+const verifyJWT = (req, res, next) => {
+  const token = req.headers.authorization;
+  console.log(token);
+  const valid = jsonwebtoken.verify(token, process.env.SECRET_KEY);
+  console.log(valid);
+  next();
+};
+
+/*                              middleware                              */
+
+try {
+  app.post("/jwt", (req, res) => {
+    const token = jsonwebtoken.sign("anything", process.env.SECRET_KEY);
+    res.send(token);
+  });
+} catch (error) {
+  console.log(error);
+}
+
+/* --------------------------------------------------------------------- */
 try {
   const client = new MongoClient(process.env.URI);
   const serviceCollection = client
